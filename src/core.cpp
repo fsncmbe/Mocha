@@ -48,6 +48,17 @@ struct
 } core;
 } // private namespace
 
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+  core.input.previous_key_states[key] = core.input.current_key_states[key];
+  core.input.current_key_states[key] = action == GLFW_PRESS;
+}
+
+void windowSizeCallback(GLFWwindow* window, int width, int height)
+{
+  glViewport(0, 0, width, height);
+}
+
 void initWindow(int width, int height, const char* title)
 {
 
@@ -100,23 +111,13 @@ void Begin()
   glfwPollEvents();
 
   // clear screen
+  clearColor(WHITE);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void End()
 {
   glfwSwapBuffers(core.window.glfw_window);
-}
-
-void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-  core.input.previous_key_states[key] = core.input.current_key_states[key];
-  core.input.current_key_states[key] = action == GLFW_PRESS;
-}
-
-void windowSizeCallback(GLFWwindow* window, int width, int height)
-{
-  glViewport(0, 0, width, height);
 }
 
 void clearColor(Color color)

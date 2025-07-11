@@ -1,18 +1,39 @@
 TARGET_EXEC := Mocha
 
-B_DIR := ./build
-S_DIR := ./src
+B_DIR := build
+S_DIR := src
+I_DIR := include src
+I_DIR := $(addprefix -I, $(I_DIR))
+L_DIR := libs
+L_DIR := $(addprefix -L, $(L_DIR))
 
-LIBS := -llua54 -lglfw -lgl
+SRC := $(wildcard $(S_DIR)/*.cpp)
 
-$(B_DIR)/$(TARGET_EXEC): $(B_DIR)/glad.o, $(B_DIR)/core.o, $(B_DIR)/utils.o
-	g++ $(S_DIR)/mocha.cpp -o $(B_DIR)/$(TARGET_EXEC) -Llibs -Iinclude $(LIBS)
+OBJS := $(patsubst $(S_DIR)/%,%,$(SRC))
+OBJS := $(patsubst %,build/%,$(OBJS))
+OBJS := $(patsubst %.cpp,%.o,$(OBJS))
 
-$(B_DIR)/glad.o:
-	g++ $(S_DIR)/glad.cpp -o $(B_DIR)/glad.o -Llibs -Iinclude $(LIBS)
+CXX := g++
 
-$(B_DIR)/core.o:
-	g++ $(S_DIR)/core.cpp -o $(B_DIR)/core.o -Llibs -Iinclude $(LIBS)
+UNAME := $(shell uname)
 
-$(B_DIR)/utils.o:
-	g++ $(S_DIR)/utils.cpp -o $(B_DIR)/utils.o -Llibs -Iinclude $(LIBS)
+ifeq ($(UNAME), Linux)
+LIBS := -lGL -lglfw -ldl -llua54
+endif
+ifeq ($(UNAME), MSYS_NT-10.0-26100)
+LIBS := -libglfw3.a -lgdi32 -lopengl32 -llua54.a
+endif
+
+all: $(B_DIR)/$(TARGET_EXEC)
+
+# Get .o -> .exe
+$(B_DIR)/$(TARGET_EXEC) : $(OBJS)
+	$(CXX) -o $@ $^ $(L_DIR) $(LIBS)
+
+# Get .cpp -> .o
+$(B_DIR)/%.o: $(S_DIR)/%.cpp
+	$(CXX) $(I_DIR) -c $< -o $@
+
+.PHONY: clean
+clean:
+	rm -r $(B_DIR)/*

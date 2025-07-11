@@ -6,9 +6,8 @@
 namespace mocha
 {
 
-void log(LogLevel level, const char* text);
+void log(int level, const char* text);
   
-
 }
 
 

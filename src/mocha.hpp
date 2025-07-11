@@ -12,8 +12,6 @@
 namespace mocha
 {
 
-// -------------------- DEFINES
-
 // -------------------- STRUCTS
 struct Vector2 {
   float x;
@@ -52,6 +50,9 @@ struct Rectangle {
   float width;
   float height;
 };
+
+// -------------------- DEFINES
+const Color WHITE = {255, 255, 255, 255};
 
 // -------------------- ENUMS
 
@@ -127,6 +128,8 @@ kUP = 265,
 void initWindow(int width, int height, const char* title);
 void closeWindow();
 bool windowShouldClose();
+void Begin();
+void End();
 
 // drawing related
 void clearColor(Color color);

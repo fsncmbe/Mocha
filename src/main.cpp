@@ -6,5 +6,10 @@
 
 int main()
 {
+  mocha::initWindow(1920, 1080, "hello");
+
+  mocha::Begin();
+
+  mocha::End();
   return 0;
 }
