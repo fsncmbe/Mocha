@@ -3,9 +3,8 @@
 
 #include <iostream>
 
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
 #include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
 // Combines every submodule into one big hpp
 
@@ -144,6 +143,12 @@ bool getKeyPressed(int key);
 bool getKeyDown(int key);
 bool getKeyReleased(int key);
 bool getKeyUp(int key);
+
+// resources
+bool fileExists(const char* path);
+bool dirExists(const char* path);
+bool isFileExtension(const char* path, const char* extension);
+
 }
 
 #endif
