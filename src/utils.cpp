@@ -16,4 +16,22 @@ void log(int level, const char *text)
   }
 }
 
+void log(int level, int i)
+{
+  std::string s = std::to_string(i);
+  log(level, s.c_str());
+}
+
+void log(int level, double d)
+{
+  std::string s = std::to_string(d);
+  log(level, s.c_str());
+}
+
+void log(int level, float f)
+{
+  std::string s = std::to_string(f);
+  log(level, s.c_str());
+}
+
 } // mocha

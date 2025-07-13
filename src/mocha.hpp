@@ -2,9 +2,20 @@
 #define MOCHA_HPP
 
 #include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+#ifdef __linux__
+  #define LINUX
+#endif
+
+#ifdef _WIN32
+  #define WINDOWS
+#endif
 
 // Combines every submodule into one big hpp
 
@@ -50,8 +61,31 @@ struct Rectangle {
   float height;
 };
 
+struct Shader {
+  int id;
+};
+
+struct Mesh {
+  int   vertex_count;
+  
+  unsigned int VAO;
+  unsigned int VBO;
+};
+
+struct Model {
+  //Matrix            transform;
+  //std::vector<Mesh> meshes;
+};
+
 // -------------------- DEFINES
-const Color WHITE = {255, 255, 255, 255};
+const Color BLACK   = {0, 0, 0, 255};
+const Color BLUE    = {0, 0, 255, 255};
+const Color RED     = {255, 0, 0, 255};
+const Color GREEN   = {0, 255, 0, 255};
+const Color YELLOW  = {255, 255, 0, 255};
+const Color PINK    = {255, 0, 255, 255};
+const Color TURQ    = {0, 255, 255, 255};
+const Color WHITE   = {255, 255, 255, 255};
 
 // -------------------- ENUMS
 
@@ -127,10 +161,10 @@ kUP = 265,
 void initWindow(int width, int height, const char* title);
 void closeWindow();
 bool windowShouldClose();
-void Begin();
+bool Begin();
 void End();
 
-// drawing related
+// drawing
 void clearColor(Color color);
 
 // timing
@@ -145,10 +179,14 @@ bool getKeyReleased(int key);
 bool getKeyUp(int key);
 
 // resources
-bool fileExists(const char* path);
-bool dirExists(const char* path);
-bool isFileExtension(const char* path, const char* extension);
-
+const char* loadFile(const char* path);
+Shader loadShader(const char* name);
+Model loadModel(const char* name);
 }
+
+// Syntax defines
+
+#define MOCHA_LOOP_START while(mocha::Begin()) {
+#define MOCHA_LOOP_END mocha::End();}
 
 #endif

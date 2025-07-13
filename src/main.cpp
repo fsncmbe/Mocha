@@ -8,8 +8,12 @@ int main()
 {
   mocha::initWindow(1920, 1080, "hello");
 
-  mocha::Begin();
+  mocha::Shader s = mocha::loadShader("default");
+  mocha::Model m = mocha::loadModel("cube");
 
-  mocha::End();
+  MOCHA_LOOP_START
+
+  MOCHA_LOOP_END
+
   return 0;
 }
