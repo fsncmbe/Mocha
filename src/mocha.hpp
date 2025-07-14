@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <sstream>
 #include <vector>
 
 #include <glad/glad.h>
@@ -66,15 +67,13 @@ struct Shader {
 };
 
 struct Mesh {
-  int   vertex_count;
-  
-  unsigned int VAO;
-  unsigned int VBO;
+  unsigned int indices_count;
+  unsigned int vao;
 };
 
 struct Model {
   //Matrix            transform;
-  //std::vector<Mesh> meshes;
+  std::vector<Mesh> meshes;
 };
 
 // -------------------- DEFINES
@@ -179,9 +178,9 @@ bool getKeyReleased(int key);
 bool getKeyUp(int key);
 
 // resources
-const char* loadFile(const char* path);
-Shader loadShader(const char* name);
-Model loadModel(const char* name);
+std::string loadFile(const std::string& path);
+Shader loadShader(const std::string& name);
+Model loadModel(const std::string& name);
 }
 
 // Syntax defines

@@ -218,7 +218,7 @@ bool getKeyUp(int key)
 
 // resources
 
-const char* loadFile(const char* path)
+std::string loadFile(const std::string& path)
 {
   std::string s = core.assets.path;
   s = s.append(path);
@@ -234,17 +234,18 @@ const char* loadFile(const char* path)
   std::string out((std::istreambuf_iterator<char>(file)),std::istreambuf_iterator<char>());
 
   file.close();
-  log(LogLevel::DEBUG, out.c_str());
-  return out.c_str();
+  return out;
 }
 
-Shader loadShader(const char* name)
+Shader loadShader(const std::string& name)
 {
-  std::string vpath = "shaders/" + (std::string)name + ".vs";
-  const char* v_shader = loadFile(vpath.c_str());
+  std::string v_path = "shaders/" + name + ".vs";
+  std::string v_string = loadFile(v_path);
+  const char* v_shader = v_string.c_str();
 
-  std::string fpath = "shaders/" + (std::string)name + ".fs";
-  const char* f_shader = loadFile(fpath.c_str());
+  std::string f_path = "shaders/" + name + ".fs";
+  std::string f_string = loadFile(f_path);
+  const char* f_shader = f_string.c_str();
 
   unsigned int vertex, fragment;
 
@@ -268,22 +269,87 @@ Shader loadShader(const char* name)
   return {id};
 }
 
-Model loadModel(const char* name)
+Model loadModel(const std::string& name)
 {
-  std::string path = "models/" + (std::string)name + ".obj";
-  const char* obj_file = loadFile(path.c_str());
-  
-  const char* line_start = obj_file;
 
+  // file handling
+  std::string path = "models/" + (std::string)name + ".obj";
+
+  // add a break at the end so the loop recognizes it 
+  std::string obj_string = loadFile(path) + '\n';
+  const char* obj_file = obj_string.c_str();
+
+  // vectors for data
+  std::vector<unsigned int> vertex_indices, uv_indices, normal_indices;
+  std::vector<Vector3> temp_vertices, temp_normals;
+  std::vector<Vector2> temp_uvs;
+
+
+  // fill vertex_indices... with data
+  const char* line_start = obj_file;
   for (const char* p = obj_file; *p != '\0'; ++p)
   {
     if (*p == '\n')
     {
       std::string line(line_start, p);
-      // Do something with the line...
-      log(LogLevel::DEBUG, line.c_str());
+
+      std::istringstream line_stream(line);
+
+      std::string s;
+
+      line_stream >> s;
+
+      // vertex
+      if (s == "v")
+      {
+        Vector3 vertex;
+        line_stream >> vertex.x >> vertex.y >> vertex.z;
+        temp_vertices.push_back(vertex);
+      }
+      // vertex texture
+      else if (s == "vt")
+      {
+        Vector2 uv;
+        line_stream >> uv.x >> uv.y;
+        temp_uvs.push_back(uv);
+      }
+      // vertex normal
+      else if (s == "vn")
+      {
+        Vector3 normal;
+        line_stream >> normal.x >> normal.y >> normal.z;
+        temp_normals.push_back(normal);
+      }
+      // material
+      else if (s == "usemtl")
+      {
+        
+      }
+      // face
+      else if (s == "f")
+      {
+        const int f_nums = 3;
+        std::string strings[f_nums];
+
+        for (int i=0; i<f_nums; i++)
+        {
+          line_stream >> strings[i];
+          unsigned int vertex_index, uv_index, normal_index;
+          sscanf(strings[i].c_str(), "%d/%d/%d", &vertex_index, &uv_index, &normal_index);
+          vertex_indices.push_back(vertex_index);
+          uv_indices.push_back(uv_index);
+          normal_indices.push_back(normal_index);
+        }
+      }
       line_start = p + 1;
     }
+  }
+
+  for (int i=0; i<vertex_indices.size(); i++)
+  {
+    unsigned int vertex_index = vertex_indices[i];
+
+    Vector3 vertex = temp_vertices[vertex_index-1];
   }
 
   return {};
