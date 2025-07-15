@@ -38,7 +38,7 @@ void updateSystems()
 {
   for (System s : core.ecs.sytems)
   {
-    s.update(core.timing.delta);
+    s.update(core.window.delta);
   }
 }
 }
