@@ -53,8 +53,36 @@ struct
   bool current_mouse_button_states[MAX_MOUSE_BUTTONS];
   bool previous_mouse_button_states[MAX_MOUSE_BUTTONS];
   } input;
+
+  // ecs
+  struct {
+    std::vector<Entity> entites;
+    std::unordered_map<std::type_index, std::string> components;
+    std::vector<System> sytems;
+  } ecs;
 } core;
 } // private namespace
+
+// struct functions
+
+bool Vector2::operator==(const Vector2& other)
+{
+  return x == other.x && y == other.y;
+}
+
+bool Vector3::operator==(const Vector3& other)
+{
+  return x == other.x && y == other.y && z == other.z;
+}
+
+bool Vertex::operator==(const Vertex& other)
+{
+  return position == other.position 
+      && tex_coord == other.tex_coord 
+      && normal == other.normal;
+}
+
+// callbacks
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -140,7 +168,7 @@ bool Begin()
   glfwPollEvents();
 
   // clear screen
-  clearColor(WHITE);
+  clearColor(BLACK);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   return !windowShouldClose();
@@ -156,6 +184,13 @@ void End()
 void clearColor(Color color)
 {
   glClearColor(color.r, color.g, color.b, color.a);
+}
+
+void drawModel(Model m)
+{
+  glBindVertexArray(m.vao);
+  glDrawElements(GL_TRIANGLES, m.indices_count, GL_UNSIGNED_INT, 0);
+  glBindVertexArray(0);
 }
 
 
@@ -280,13 +315,15 @@ Model loadModel(const std::string& name)
   const char* obj_file = obj_string.c_str();
 
   // vectors for data
-  std::vector<unsigned int> vertex_indices, uv_indices, normal_indices;
-  std::vector<Vector3> temp_vertices, temp_normals;
-  std::vector<Vector2> temp_uvs;
-
+  std::vector<Vertex>       vertices;
+  std::vector<unsigned int> indices;
+  std::vector<Vector3>      temp_positions;
+  std::vector<Vector3>      temp_normals;
+  std::vector<Vector2>      temp_uvs;
 
   // fill vertex_indices... with data
   const char* line_start = obj_file;
+
   for (const char* p = obj_file; *p != '\0'; ++p)
   {
     if (*p == '\n')
@@ -294,65 +331,169 @@ Model loadModel(const std::string& name)
       std::string line(line_start, p);
 
       std::istringstream line_stream(line);
+      std::string type;
 
-      std::string s;
-
-      line_stream >> s;
+      line_stream >> type;
 
       // vertex
-      if (s == "v")
+      if (type == "v")
       {
-        Vector3 vertex;
-        line_stream >> vertex.x >> vertex.y >> vertex.z;
-        temp_vertices.push_back(vertex);
+        Vector3 pos;
+        line_stream >> pos.x >> pos.y >> pos.z;
+        temp_positions.push_back(pos);
       }
       // vertex texture
-      else if (s == "vt")
+      else if (type == "vt")
       {
         Vector2 uv;
         line_stream >> uv.x >> uv.y;
         temp_uvs.push_back(uv);
       }
       // vertex normal
-      else if (s == "vn")
+      else if (type == "vn")
       {
         Vector3 normal;
         line_stream >> normal.x >> normal.y >> normal.z;
         temp_normals.push_back(normal);
       }
       // material
-      else if (s == "usemtl")
+      else if (type == "usemtl")
       {
         
       }
       // face
-      else if (s == "f")
+      else if (type == "f")
       {
         const int f_nums = 3;
         std::string strings[f_nums];
-
         for (int i=0; i<f_nums; i++)
         {
           line_stream >> strings[i];
           unsigned int vertex_index, uv_index, normal_index;
           sscanf(strings[i].c_str(), "%d/%d/%d", &vertex_index, &uv_index, &normal_index);
-          vertex_indices.push_back(vertex_index);
-          uv_indices.push_back(uv_index);
-          normal_indices.push_back(normal_index);
+
+          log(LogLevel::DEBUG, strings[i]);
+          Vertex v;
+
+          v.position  = temp_positions[vertex_index-1];
+          v.tex_coord = temp_uvs[uv_index-1];
+          v.normal    = temp_normals[normal_index-1];
+
+          auto it = std::find(vertices.begin(), vertices.end(), v);
+
+          if (it != vertices.end())
+          {
+            int index = std::distance(vertices.begin(), it);
+            indices.push_back(index);
+          } else {
+            vertices.push_back(v);
+            indices.push_back(vertices.size()-1);
+          }
         }
       }
       line_start = p + 1;
     }
   }
 
-  for (int i=0; i<vertex_indices.size(); i++)
+  unsigned int vao, vbo, ebo;
+
+  glGenVertexArrays(1, &vao);
+  glGenBuffers(1, &vbo);
+  glGenBuffers(1, &ebo);
+
+  glBindVertexArray(vao);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+  glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+  
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, tex_coord));
+
+  glEnableVertexAttribArray(2);
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+
+  glBindVertexArray(0);
+
+  Model m;
+  m.vao = vao;
+  m.indices_count = indices.size();
+  return m;
+}
+
+// shader
+
+void shaderSet(Shader shader, const std::string& name, bool b)
+{
+  glUniform1i(glGetUniformLocation(shader.id, name.c_str()), (int)b);
+}
+
+void shaderSet(Shader shader, const std::string& name, int i)
+{
+  glUniform1i(glGetUniformLocation(shader.id, name.c_str()), i);
+}
+
+void shaderSet(Shader shader, const std::string& name, float f)
+{
+  glUniform1f(glGetUniformLocation(shader.id, name.c_str()), f);
+}
+
+void shaderSet(Shader shader, const std::string& name, Vector2 v2)
+{
+  glUniform2f(glGetUniformLocation(shader.id, name.c_str()), v2.x, v2.y);
+}
+
+void shaderSet(Shader shader, const std::string& name, Vector3 v3)
+{
+  glUniform3f(glGetUniformLocation(shader.id, name.c_str()), v3.x, v3.y, v3.z);
+}
+
+void shaderUse(Shader shader)
+{
+  glUseProgram(shader.id);
+}
+
+// ecs
+
+ComponentMap::ComponentMap(const std::vector<std::any>& vec)
+{
+  if (!vec.empty())
   {
-    unsigned int vertex_index = vertex_indices[i];
-
-    Vector3 vertex = temp_vertices[vertex_index-1];
+    for (auto i : vec)
+    {
+      components[core.ecs.components[std::type_index(typeid(i.type()))]] = i;
+    }
   }
+};
 
-  return {};
+void registerComp(std::type_index t, const std::string& name)
+{
+  core.ecs.components[t] = name;
+}
+
+Entity* addEntity()
+{
+  core.ecs.entites.push_back({});
+  return &core.ecs.entites.back();
+}
+
+Entity* addEntity(Entity e)
+{
+  core.ecs.entites.push_back(e);
+  return &core.ecs.entites.back();
+}
+
+void updateSystems()
+{
+  for (System s : core.ecs.sytems)
+  {
+    s.update(core.timing.delta);
+  }
 }
 
 }

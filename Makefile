@@ -18,6 +18,7 @@ OBJS := $(patsubst %,build/%,$(OBJS))
 OBJS := $(patsubst %.cpp,%.o,$(OBJS))
 
 CXX := g++
+CXX_FLAGS := -std=c++20
 
 UNAME := $(shell uname)
 
@@ -32,15 +33,15 @@ all: $(B_DIR)/$(TARGET_EXEC)
 
 # Get .o -> .exe
 $(B_DIR)/$(TARGET_EXEC) : $(OBJS)
-	$(CXX) -o $@ $^ $(L_DIR) $(LIBS)
+	$(CXX) $(CXX_FLAGS) -o $@ $^ $(L_DIR) $(LIBS)
 
 # Get .cpp -> .o for src
 $(B_DIR)/%.o: $(S_DIR)/%.cpp
-	$(CXX) $(I_DIR) -c $< -o $@
+	$(CXX) $(CXX_FLAGS) $(I_DIR) -c $< -o $@
 
 # Get .cpp -> .o for externals
 $(B_DIR)/%.o: $(EX_DIR)/%.cpp
-	$(CXX) $(I_DIR) -c $< -o $@
+	$(CXX) $(CXX_FLAGS) $(I_DIR) -c $< -o $@
 
 .PHONY: clean
 clean:

@@ -6,6 +6,11 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <algorithm>
+#include <any>
+#include <unordered_map>
+#include <typeindex>
+#include <functional>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -27,12 +32,15 @@ namespace mocha
 struct Vector2 {
   float x;
   float y;
+
+  bool operator==(const Vector2& other);
 };
 
 struct Vector3 {
   float x;
   float y;
   float z;
+  bool operator==(const Vector3& other);
 };
 
 struct Vector4 {
@@ -40,6 +48,14 @@ struct Vector4 {
   float y;
   float z;
   float w;
+};
+
+struct Vertex {
+  Vector3 position;
+  Vector2 tex_coord;
+  Vector3 normal;
+
+  bool operator==(const Vertex& other);
 };
 
 struct Matrix {
@@ -66,15 +82,51 @@ struct Shader {
   int id;
 };
 
-struct Mesh {
-  unsigned int indices_count;
+struct Model {
+  int indices_count;
   unsigned int vao;
 };
 
-struct Model {
-  //Matrix            transform;
-  std::vector<Mesh> meshes;
+// ecs
+
+struct ComponentMap
+{
+  std::unordered_map<std::string, std::any> components;
+
+  ComponentMap(const std::vector<std::any>& vec = {});
+  ~ComponentMap(){components.clear();};
+
+  std::any* operator[](std::string& s)
+  {
+    return &components[s];
+  }
 };
+
+struct Entity {
+  ComponentMap c_map;
+};
+
+struct System {
+  std::vector<std::any> nodes;
+  std::function<void(float)> update;
+};
+
+// components
+struct Transformation {
+  Vector3 pos;
+  Vector3 up;
+};
+
+struct Movement {
+  Vector3 vec;
+};
+
+// nodes
+struct PositionNode {
+  Transformation* trans;
+  Movement*       move;
+};
+
 
 // -------------------- DEFINES
 const Color BLACK   = {0, 0, 0, 255};
@@ -165,10 +217,11 @@ void End();
 
 // drawing
 void clearColor(Color color);
+void drawModel(Model m);
 
 // timing
-void setFPS(int fps);
-int getFPS();
+void  setFPS(int fps);
+int   getFPS();
 float getDT();
 
 // input
@@ -179,8 +232,23 @@ bool getKeyUp(int key);
 
 // resources
 std::string loadFile(const std::string& path);
-Shader loadShader(const std::string& name);
-Model loadModel(const std::string& name);
+Shader      loadShader(const std::string& name);
+Model       loadModel(const std::string& name);
+
+// shader
+void shaderSet(Shader shader, const std::string& name, bool b);
+void shaderSet(Shader shader, const std::string& name, int i);
+void shaderSet(Shader shader, const std::string& name, float f);
+void shaderSet(Shader shader, const std::string& name, Vector2 v2);
+void shaderSet(Shader shader, const std::string& name, Vector3 v3);
+void shaderUse(Shader shader);
+
+// ecs
+void    registerComp(std::type_index t, const std::string& name);
+Entity* addEntity();
+Entity* addEntity(Entity e);
+void    updateSystems();
+
 }
 
 // Syntax defines

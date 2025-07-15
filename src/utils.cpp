@@ -21,6 +21,11 @@ void log(int level, const std::string& text)
   log(level, text.c_str());
 }
 
+void log(int level, bool b)
+{
+  log(level, std::to_string(b).c_str());
+}
+
 void log(int level, int i)
 {
   std::string s = std::to_string(i);
@@ -39,17 +44,17 @@ void log(int level, float f)
   log(level, s.c_str());
 }
 
-void log(int level, Vector2 v)
+void log(int level, Vector2 v2)
 {
-  std::string s = "x: " + std::to_string(v.x) +  " y: " + std::to_string(v.y);
+  std::string s = "x: " + std::to_string(v2.x) +  " y: " + std::to_string(v2.y);
   log(level, s.c_str());
 }
 
-void log(int level, Vector3 v)
+void log(int level, Vector3 v3)
 {
-  std::string s = "x: "  + std::to_string(v.x)
-                + " y: " + std::to_string(v.y)
-                + " z: " + std::to_string(v.z);
+  std::string s = "x: "  + std::to_string(v3.x)
+                + " y: " + std::to_string(v3.y)
+                + " z: " + std::to_string(v3.z);
   log(level, s.c_str());
 }
 
