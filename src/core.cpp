@@ -1,6 +1,7 @@
 #define MOCHA_CORE
 
 #include <core.hpp>
+#include "mocha.hpp"
 
 namespace mocha 
 {
@@ -25,4 +26,13 @@ bool Vertex::operator==(const Vertex& other)
       && normal == other.normal;
 }
 
+bool Entity::operator==(const Entity& other)
+{
+  return id == other.id;
+}
+
+void Entity::operator<<(std::any component)
+{
+  c_map[core.ecs.components[std::type_index(typeid(component))]] = component;
+}
 }

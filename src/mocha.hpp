@@ -97,35 +97,49 @@ struct ComponentMap
   ComponentMap(const std::vector<std::any>& vec = {});
   ~ComponentMap(){components.clear();};
 
-  std::any* operator[](std::string& s)
+  std::any& operator[](std::string& s)
   {
-    return &components[s];
+    return components[s];
   }
 };
 
 struct Entity {
   ComponentMap c_map;
+  int id;
+
+  bool operator==(const Entity& other);
+  void operator<<(std::any component);
 };
 
 struct System {
   std::vector<std::any> nodes;
   std::function<void(float)> update;
+  std::string type_name;
 };
 
-// components
-struct Transformation {
+// components identify with C at end
+struct TransformationC {
   Vector3 pos;
   Vector3 up;
 };
 
-struct Movement {
+struct MovementC {
   Vector3 vec;
+};
+
+struct RenderC {
+  Model model;
 };
 
 // nodes
 struct PositionNode {
-  Transformation* trans;
-  Movement*       move;
+  TransformationC* trans;
+  MovementC*       move;
+};
+
+struct RenderNode {
+  RenderC*        render;
+  TransformationC trans;
 };
 
 
@@ -215,6 +229,7 @@ void closeWindow();
 bool windowShouldClose();
 bool Begin();
 void End();
+
 void  setFPS(int fps);
 int   getFPS();
 float getDT();
@@ -222,11 +237,14 @@ float getDT();
 // drawing
 void clearColor(Color color);
 void drawModel(Model m);
+void drawCube(Vector3 pos, Vector3 size, Color color);
+
 void shaderSet(Shader shader, const std::string& name, bool b);
 void shaderSet(Shader shader, const std::string& name, int i);
 void shaderSet(Shader shader, const std::string& name, float f);
 void shaderSet(Shader shader, const std::string& name, Vector2 v2);
 void shaderSet(Shader shader, const std::string& name, Vector3 v3);
+void shaderSet(Shader shader, const std::string& name, Color c);
 void shaderUse(Shader shader);
 
 // input
@@ -244,12 +262,13 @@ Model       loadModel(const std::string& name);
 void    registerComp(std::type_index t, const std::string& name);
 Entity* addEntity();
 Entity* addEntity(Entity e);
+void    delEntity(Entity e);
+void    clearEntities();
 void    updateSystems();
 
-// lua functions
+// lua functions and bindings
 void luaBindings();
-int printInLua(lua_State* L);
-
+void runScripts();
 }
 
 // Syntax defines

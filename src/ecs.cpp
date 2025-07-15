@@ -34,6 +34,21 @@ Entity* addEntity(Entity e)
   return &core.ecs.entites.back();
 }
 
+void delEntity(Entity e)
+{
+  auto it = std::find(core.ecs.entites.begin(), core.ecs.entites.end(), e);
+
+  if (it != core.ecs.entites.end())
+  {
+    core.ecs.entites.erase(it);
+  }
+}
+
+void clearEntities()
+{
+  core.ecs.entites.clear();
+}
+
 void updateSystems()
 {
   for (System s : core.ecs.sytems)
