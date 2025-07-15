@@ -253,7 +253,6 @@ int printInLua(lua_State* L);
 }
 
 // Syntax defines
-
 #define MOCHA_LOOP_START while(mocha::Begin()) {
 #define MOCHA_LOOP_END mocha::End();}
 
