@@ -1,0 +1,50 @@
+#ifndef MOCHA_CORE_HPP
+#define MOCHA_CORE_HPP
+
+#include <mocha.hpp>
+
+#define MAX_KEYS          512
+#define MAX_MOUSE_BUTTONS 8
+#define MAX_GAMEPADS      4
+
+namespace mocha 
+{
+struct Core {
+  struct {
+    std::string title;
+    GLFWwindow* glfw_window;
+
+    Rectangle screen;         // whole screen
+    Rectangle render_screen;  // render area
+    Vector2   render_offset;  // offset from screen to render
+
+    double current;
+    double previous;
+    double delta;
+    double fps;
+  } window;
+
+  struct {
+  const char* path;
+  } assets;
+
+  struct {
+    bool current_key_states[MAX_KEYS];
+    bool previous_key_states[MAX_KEYS];
+
+    bool current_mouse_button_states[MAX_MOUSE_BUTTONS];
+    bool previous_mouse_button_states[MAX_MOUSE_BUTTONS];
+  } input;
+
+  struct {
+    std::vector<Entity> entites;
+    std::unordered_map<std::type_index, std::string> components;
+    std::vector<System> sytems;
+  } ecs;
+};
+
+// Define global core
+extern Core core;
+}
+
+#endif

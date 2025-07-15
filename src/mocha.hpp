@@ -12,6 +12,7 @@
 #include <typeindex>
 #include <functional>
 
+#include <lua/lua.hpp>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -214,15 +215,19 @@ void closeWindow();
 bool windowShouldClose();
 bool Begin();
 void End();
+void  setFPS(int fps);
+int   getFPS();
+float getDT();
 
 // drawing
 void clearColor(Color color);
 void drawModel(Model m);
-
-// timing
-void  setFPS(int fps);
-int   getFPS();
-float getDT();
+void shaderSet(Shader shader, const std::string& name, bool b);
+void shaderSet(Shader shader, const std::string& name, int i);
+void shaderSet(Shader shader, const std::string& name, float f);
+void shaderSet(Shader shader, const std::string& name, Vector2 v2);
+void shaderSet(Shader shader, const std::string& name, Vector3 v3);
+void shaderUse(Shader shader);
 
 // input
 bool getKeyPressed(int key);
@@ -235,19 +240,15 @@ std::string loadFile(const std::string& path);
 Shader      loadShader(const std::string& name);
 Model       loadModel(const std::string& name);
 
-// shader
-void shaderSet(Shader shader, const std::string& name, bool b);
-void shaderSet(Shader shader, const std::string& name, int i);
-void shaderSet(Shader shader, const std::string& name, float f);
-void shaderSet(Shader shader, const std::string& name, Vector2 v2);
-void shaderSet(Shader shader, const std::string& name, Vector3 v3);
-void shaderUse(Shader shader);
-
 // ecs
 void    registerComp(std::type_index t, const std::string& name);
 Entity* addEntity();
 Entity* addEntity(Entity e);
 void    updateSystems();
+
+// lua functions
+void luaBindings();
+int printInLua(lua_State* L);
 
 }
 

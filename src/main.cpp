@@ -19,8 +19,8 @@ int main()
   mocha::shaderUse(s);
 
   MOCHA_LOOP_START
-  mocha::drawModel(m);
-
+  
+  
   MOCHA_LOOP_END
 
   return 0;
