@@ -59,7 +59,35 @@ struct Model {
   unsigned int vao;
 };
 
+struct Camera {
+  float     speed;
+  float     sens;
+  float     zoom;
+  glm::vec3 up;
+  glm::mat4 view;
+  glm::mat4 projection;
+};
+
+// ECS 
+
 using Entity = unsigned int;
+
+struct System {
+  virtual void update() = 0;
+};
+
+// COMPONENTS in ecs namespace
+// differentiate better and reuse names
+namespace ecs
+{
+using Render   =  Model;
+using Camera3D =  Camera;
+struct Position {
+  glm::vec3 pos;
+  glm::vec3 rotate;
+  glm::mat4 trans;
+};
+}
 
 // COLORS 
 const Color BLACK   = {0, 0, 0, 255};
@@ -182,6 +210,7 @@ COMPONENT   void                emplace(Entity e, const Component& c);
 COMPONENT   bool                has(Entity e);
 COMPONENT   Component           get(Entity e);
 COMPONENTS  std::vector<Entity> view();
+            void                update();
 }
 
 // lua
@@ -191,6 +220,7 @@ void runScripts();
 
 // Syntax defines
 #define MOCHA_LOOP_START while(mocha::Begin()) {
+#define MOCHA_SYSTEMS_UPDATE mocha::ecs::update();
 #define MOCHA_LOOP_END mocha::End();}
 
 #endif

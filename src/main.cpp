@@ -16,7 +16,7 @@ int main()
   mocha::shaderUse(s);
 
   MOCHA_LOOP_START
-
+  MOCHA_SYSTEMS_UPDATE
 
 
   MOCHA_LOOP_END

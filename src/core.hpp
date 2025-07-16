@@ -46,6 +46,7 @@ struct Core {
   struct {
     std::unordered_map<std::type_index, void*> sets;
     Entity next_entity = 0;
+    std::vector<System*> systems;
   } ecs;
 };
 

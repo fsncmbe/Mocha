@@ -156,5 +156,13 @@ std::vector<Entity> view()
   return View<Component...>(getSet<Component>()...).getMatching();
 }
 
+void update()
+{
+  for (System* s : core.ecs.systems)
+  {
+    s->update();
+  }
+}
+
 } // ecs
 } // mocha
