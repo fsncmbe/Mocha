@@ -12,8 +12,8 @@ void log(int level, bool b);
 void log(int level, int i);
 void log(int level, double d);
 void log(int level, float f);
-void log(int level, Vector2 v2);
-void log(int level, Vector3 v3);
+void log(int level, glm::vec2 v2);
+void log(int level, glm::vec3 v3);
 }
 
 

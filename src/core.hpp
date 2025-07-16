@@ -16,7 +16,7 @@ struct Core {
 
     Rectangle screen;         // whole screen
     Rectangle render_screen;  // render area
-    Vector2   render_offset;  // offset from screen to render
+    glm::vec2 render_offset;  // offset from screen to render
 
     double current;
     double previous;
@@ -25,7 +25,14 @@ struct Core {
   } window;
 
   struct {
-  const char* path;
+    Shader    current_shader;
+    glm::vec3 world_up;
+    Entity*   cam_debug;
+    Entity*   cam_current;
+  } render;
+
+  struct {
+    const char* path;
   } assets;
 
   struct {
@@ -38,8 +45,7 @@ struct Core {
 
   struct {
     std::vector<Entity> entites;
-    std::unordered_map<std::type_index, std::string> components;
-    std::vector<System> sytems;
+    std::vector<ISystem<std::any>*> sytems;
   } ecs;
 };
 

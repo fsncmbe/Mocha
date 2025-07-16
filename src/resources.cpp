@@ -70,9 +70,9 @@ Model loadModel(const std::string& name)
   // vectors for data
   std::vector<Vertex>       vertices;
   std::vector<unsigned int> indices;
-  std::vector<Vector3>      temp_positions;
-  std::vector<Vector3>      temp_normals;
-  std::vector<Vector2>      temp_uvs;
+  std::vector<glm::vec3>      temp_positions;
+  std::vector<glm::vec3>      temp_normals;
+  std::vector<glm::vec2>      temp_uvs;
 
   // fill vertex_indices... with data
   const char* line_start = obj_file;
@@ -91,21 +91,21 @@ Model loadModel(const std::string& name)
       // vertex
       if (type == "v")
       {
-        Vector3 pos;
+        glm::vec3 pos;
         line_stream >> pos.x >> pos.y >> pos.z;
         temp_positions.push_back(pos);
       }
       // vertex texture
       else if (type == "vt")
       {
-        Vector2 uv;
+        glm::vec2 uv;
         line_stream >> uv.x >> uv.y;
         temp_uvs.push_back(uv);
       }
       // vertex normal
       else if (type == "vn")
       {
-        Vector3 normal;
+        glm::vec3 normal;
         line_stream >> normal.x >> normal.y >> normal.z;
         temp_normals.push_back(normal);
       }

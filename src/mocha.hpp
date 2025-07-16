@@ -15,6 +15,8 @@
 #include <lua/lua.hpp>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #ifdef __linux__
   #define LINUX
@@ -29,41 +31,13 @@
 namespace mocha
 {
 
-// -------------------- STRUCTS
-struct Vector2 {
-  float x;
-  float y;
-
-  bool operator==(const Vector2& other);
-};
-
-struct Vector3 {
-  float x;
-  float y;
-  float z;
-  bool operator==(const Vector3& other);
-};
-
-struct Vector4 {
-  float x;
-  float y;
-  float z;
-  float w;
-};
-
+// -------------------- STRUCT
 struct Vertex {
-  Vector3 position;
-  Vector2 tex_coord;
-  Vector3 normal;
+  glm::vec3 position;
+  glm::vec2 tex_coord;
+  glm::vec3 normal;
 
   bool operator==(const Vertex& other);
-};
-
-struct Matrix {
-  float m0, m4, m8, m12;
-  float m1, m5, m9, m13;
-  float m2, m6, m10, m14;
-  float m3, m7, m11, m15;
 };
 
 struct Color {
@@ -97,10 +71,8 @@ struct ComponentMap
   ComponentMap(const std::vector<std::any>& vec = {});
   ~ComponentMap(){components.clear();};
 
-  std::any& operator[](std::string& s)
-  {
-    return components[s];
-  }
+  std::any& operator[](std::string& s);
+  std::any& operator[](const char* s);
 };
 
 struct Entity {
@@ -111,37 +83,77 @@ struct Entity {
   void operator<<(std::any component);
 };
 
-struct System {
-  std::vector<std::any> nodes;
-  std::function<void(float)> update;
-  std::string type_name;
+// Needs to be implemented by every system
+template<typename T>
+struct ISystem {
+  virtual void update(float dt) = 0;
+
+  void addNode(T n)
+  {
+    nodes.push_back(n);
+  }
+
+  void delNode(T n)
+  {
+    auto it = std::find(nodes.begin(), nodes.end(), n);
+
+    if (it != nodes.end())
+    {
+      nodes.erase(it);
+    }
+  }
+
+  std::vector<T> nodes;
 };
 
-// components identify with C at end
-struct TransformationC {
-  Vector3 pos;
-  Vector3 up;
+// components
+struct PositionC {
+  glm::vec3 pos;
+  glm::vec3 up;
+  glm::vec3 front;
+  glm::vec3 right;
 };
 
 struct MovementC {
-  Vector3 vec;
+  glm::vec3 direction;
 };
 
 struct RenderC {
   Model model;
 };
 
+struct CameraC {
+  float yaw   = -90.0f;
+  float pitch =   0.0f;
+  float speed =   2.5f;
+  float sens  =   0.1f;
+  float zoom  =  45.0f;
+
+  glm::mat4 view;
+  glm::mat4 projection;
+};
+
+struct BoundToC {
+  Entity* entity;
+};
+
 // nodes
-struct PositionNode {
-  TransformationC* trans;
-  MovementC*       move;
+
+struct Node {
+  int e_id;
+  bool operator==(Node& other);
 };
 
-struct RenderNode {
-  RenderC*        render;
-  TransformationC trans;
+struct RenderN : Node {
+  PositionC* trans;
+  RenderC*   render;
 };
 
+struct CameraN : Node {
+  PositionC* pos;
+  CameraC*   cam;
+  BoundToC*  bound;
+};
 
 // -------------------- DEFINES
 const Color BLACK   = {0, 0, 0, 255};
@@ -163,13 +175,6 @@ enum LogLevel {
   ERROR,    // unrecoverable errors
   FATAL,    // program needs to exit
   NONE
-};
-
-enum CameraMode {
-  FREE,         // no target
-  ORBITAL,      // around a target
-  FIRST_PERSON, // eyes view of target
-  THIRD_PERSOM, // third person of target
 };
 
 enum Key {
@@ -237,14 +242,16 @@ float getDT();
 // drawing
 void clearColor(Color color);
 void drawModel(Model m);
-void drawCube(Vector3 pos, Vector3 size, Color color);
+void drawModel(Model m, glm::mat4 trans);
+void drawCube(glm::vec3 pos, glm::vec3 size, Color color);
 
 void shaderSet(Shader shader, const std::string& name, bool b);
 void shaderSet(Shader shader, const std::string& name, int i);
 void shaderSet(Shader shader, const std::string& name, float f);
-void shaderSet(Shader shader, const std::string& name, Vector2 v2);
-void shaderSet(Shader shader, const std::string& name, Vector3 v3);
+void shaderSet(Shader shader, const std::string& name, glm::vec2 v2);
+void shaderSet(Shader shader, const std::string& name, glm::vec3 v3);
 void shaderSet(Shader shader, const std::string& name, Color c);
+void shaderSet(Shader shader, const std::string& name, glm::mat4 m);
 void shaderUse(Shader shader);
 
 // input

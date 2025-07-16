@@ -44,13 +44,13 @@ void log(int level, float f)
   log(level, s.c_str());
 }
 
-void log(int level, Vector2 v2)
+void log(int level, glm::vec2 v2)
 {
   std::string s = "x: " + std::to_string(v2.x) +  " y: " + std::to_string(v2.y);
   log(level, s.c_str());
 }
 
-void log(int level, Vector3 v3)
+void log(int level, glm::vec3 v3)
 {
   std::string s = "x: "  + std::to_string(v3.x)
                 + " y: " + std::to_string(v3.y)

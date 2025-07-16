@@ -62,6 +62,19 @@ void initWindow(int width, int height, const char* title)
   core.window.fps = 1.0/60.0;
   core.window.previous = 0;
   core.assets.path = "assets/";
+  core.render.world_up = {0.0f, 1.0f, 0.0f};
+
+
+  // add cameras to core
+  Entity cam = {};
+  glm::vec3 pos =   {0, 0, 0};
+  glm::vec3 up =    {0, 1, 0};
+  glm::vec3 front = {0, 0,-1};
+  glm::vec3 right = {1, 0, 0};
+  cam << PositionC{pos, up, front, right};
+  cam << CameraC();
+  cam << BoundToC();
+  Entity* cam_debug = addEntity(cam);
 }
 
 bool windowShouldClose()

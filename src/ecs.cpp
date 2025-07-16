@@ -12,15 +12,10 @@ ComponentMap::ComponentMap(const std::vector<std::any>& vec)
   {
     for (auto i : vec)
     {
-      components[core.ecs.components[std::type_index(typeid(i.type()))]] = i;
+      components[typeid(i.type()).name()] = i;
     }
   }
 };
-
-void registerComp(std::type_index t, const std::string& name)
-{
-  core.ecs.components[t] = name;
-}
 
 Entity* addEntity()
 {
@@ -51,9 +46,10 @@ void clearEntities()
 
 void updateSystems()
 {
-  for (System s : core.ecs.sytems)
+  for (ISystem<std::any>* s : core.ecs.sytems)
   {
-    s.update(core.window.delta);
+    s->update(core.window.delta);
   }
 }
+
 }

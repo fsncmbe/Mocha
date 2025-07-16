@@ -9,21 +9,22 @@ namespace mocha
 Core core;
 
 // struct functions
-bool Vector2::operator==(const Vector2& other)
-{
-  return x == other.x && y == other.y;
-}
-
-bool Vector3::operator==(const Vector3& other)
-{
-  return x == other.x && y == other.y && z == other.z;
-}
 
 bool Vertex::operator==(const Vertex& other)
 {
   return position == other.position 
       && tex_coord == other.tex_coord 
       && normal == other.normal;
+}
+
+std::any& ComponentMap::operator[](std::string& s)
+{
+  return components[s];
+}
+
+std::any& ComponentMap::operator[](const char* s)
+{
+  return components[s];
 }
 
 bool Entity::operator==(const Entity& other)
@@ -33,6 +34,12 @@ bool Entity::operator==(const Entity& other)
 
 void Entity::operator<<(std::any component)
 {
-  c_map[core.ecs.components[std::type_index(typeid(component))]] = component;
+  c_map[typeid(component).name()] = component;
 }
+
+bool Node::operator==(Node& other)
+{
+  return e_id = other.e_id;
+}
+
 }

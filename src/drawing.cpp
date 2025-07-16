@@ -72,6 +72,12 @@ void drawModel(Model m)
   glBindVertexArray(0);
 }
 
+void drawModel(Model m, Matrix trans)
+{
+  shaderSet(core.render.current_shader, "uTrans", trans);
+  drawModel(m);
+}
+
 void drawCube(Vector3 pos, Vector3 size, Color color)
 {
   // cube not initialized
@@ -111,6 +117,11 @@ void shaderSet(Shader shader, const std::string& name, Vector3 v3)
 void shaderSet(Shader shader, const std::string &name, Color c)
 {
   glUniform4f(glGetUniformLocation(shader.id, name.c_str()), c.r, c.g, c.b, c.a);
+}
+
+void shaderSet(Shader shader, const std::string &name, Matrix m)
+{
+  glUniformMatrix4fv(glGetUniformLocation(shader.id, name.c_str()), 1, GL_FALSE, &m.m0);
 }
 
 void shaderUse(Shader shader)
