@@ -72,13 +72,13 @@ void drawModel(Model m)
   glBindVertexArray(0);
 }
 
-void drawModel(Model m, Matrix trans)
+void drawModel(Model m, glm::mat4 trans)
 {
   shaderSet(core.render.current_shader, "uTrans", trans);
   drawModel(m);
 }
 
-void drawCube(Vector3 pos, Vector3 size, Color color)
+void drawCube(glm::vec3 pos, glm::vec3 size, Color color)
 {
   // cube not initialized
   if (cube.indices_count == 0)
@@ -104,12 +104,12 @@ void shaderSet(Shader shader, const std::string& name, float f)
   glUniform1f(glGetUniformLocation(shader.id, name.c_str()), f);
 }
 
-void shaderSet(Shader shader, const std::string& name, Vector2 v2)
+void shaderSet(Shader shader, const std::string& name, glm::vec2 v2)
 {
   glUniform2f(glGetUniformLocation(shader.id, name.c_str()), v2.x, v2.y);
 }
 
-void shaderSet(Shader shader, const std::string& name, Vector3 v3)
+void shaderSet(Shader shader, const std::string& name, glm::vec3 v3)
 {
   glUniform3f(glGetUniformLocation(shader.id, name.c_str()), v3.x, v3.y, v3.z);
 }
@@ -119,9 +119,9 @@ void shaderSet(Shader shader, const std::string &name, Color c)
   glUniform4f(glGetUniformLocation(shader.id, name.c_str()), c.r, c.g, c.b, c.a);
 }
 
-void shaderSet(Shader shader, const std::string &name, Matrix m)
+void shaderSet(Shader shader, const std::string &name, glm::mat4 m)
 {
-  glUniformMatrix4fv(glGetUniformLocation(shader.id, name.c_str()), 1, GL_FALSE, &m.m0);
+  glUniformMatrix4fv(glGetUniformLocation(shader.id, name.c_str()), 1, GL_FALSE, &m[0][0]);
 }
 
 void shaderUse(Shader shader)

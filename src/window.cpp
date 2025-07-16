@@ -71,10 +71,7 @@ void initWindow(int width, int height, const char* title)
   glm::vec3 up =    {0, 1, 0};
   glm::vec3 front = {0, 0,-1};
   glm::vec3 right = {1, 0, 0};
-  cam << PositionC{pos, up, front, right};
-  cam << CameraC();
-  cam << BoundToC();
-  Entity* cam_debug = addEntity(cam);
+
 }
 
 bool windowShouldClose()

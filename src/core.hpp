@@ -44,8 +44,8 @@ struct Core {
   } input;
 
   struct {
-    std::vector<Entity> entites;
-    std::vector<ISystem<std::any>*> sytems;
+    std::unordered_map<std::type_index, void*> sets;
+    Entity next_entity = 0;
   } ecs;
 };
 

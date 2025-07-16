@@ -26,12 +26,10 @@
   #define WINDOWS
 #endif
 
-// Combines every submodule into one big hpp
-
 namespace mocha
 {
 
-// -------------------- STRUCT
+// STRUCTS
 struct Vertex {
   glm::vec3 position;
   glm::vec2 tex_coord;
@@ -47,7 +45,6 @@ struct Color {
   unsigned char a;
 };
 
-// non positional rectangle, add position vector if needed
 struct Rectangle {
   float width;
   float height;
@@ -62,100 +59,9 @@ struct Model {
   unsigned int vao;
 };
 
-// ecs
+using Entity = unsigned int;
 
-struct ComponentMap
-{
-  std::unordered_map<std::string, std::any> components;
-
-  ComponentMap(const std::vector<std::any>& vec = {});
-  ~ComponentMap(){components.clear();};
-
-  std::any& operator[](std::string& s);
-  std::any& operator[](const char* s);
-};
-
-struct Entity {
-  ComponentMap c_map;
-  int id;
-
-  bool operator==(const Entity& other);
-  void operator<<(std::any component);
-};
-
-// Needs to be implemented by every system
-template<typename T>
-struct ISystem {
-  virtual void update(float dt) = 0;
-
-  void addNode(T n)
-  {
-    nodes.push_back(n);
-  }
-
-  void delNode(T n)
-  {
-    auto it = std::find(nodes.begin(), nodes.end(), n);
-
-    if (it != nodes.end())
-    {
-      nodes.erase(it);
-    }
-  }
-
-  std::vector<T> nodes;
-};
-
-// components
-struct PositionC {
-  glm::vec3 pos;
-  glm::vec3 up;
-  glm::vec3 front;
-  glm::vec3 right;
-};
-
-struct MovementC {
-  glm::vec3 direction;
-};
-
-struct RenderC {
-  Model model;
-};
-
-struct CameraC {
-  float yaw   = -90.0f;
-  float pitch =   0.0f;
-  float speed =   2.5f;
-  float sens  =   0.1f;
-  float zoom  =  45.0f;
-
-  glm::mat4 view;
-  glm::mat4 projection;
-};
-
-struct BoundToC {
-  Entity* entity;
-};
-
-// nodes
-
-struct Node {
-  int e_id;
-  bool operator==(Node& other);
-};
-
-struct RenderN : Node {
-  PositionC* trans;
-  RenderC*   render;
-};
-
-struct CameraN : Node {
-  PositionC* pos;
-  CameraC*   cam;
-  BoundToC*  bound;
-};
-
-// -------------------- DEFINES
+// COLORS 
 const Color BLACK   = {0, 0, 0, 255};
 const Color BLUE    = {0, 0, 255, 255};
 const Color RED     = {255, 0, 0, 255};
@@ -165,8 +71,7 @@ const Color PINK    = {255, 0, 255, 255};
 const Color TURQ    = {0, 255, 255, 255};
 const Color WHITE   = {255, 255, 255, 255};
 
-// -------------------- ENUMS
-
+// ENUMS
 enum LogLevel {
   ALL = 0,
   DEBUG,    // internal debugging, disable on release
@@ -266,14 +171,20 @@ Shader      loadShader(const std::string& name);
 Model       loadModel(const std::string& name);
 
 // ecs
-void    registerComp(std::type_index t, const std::string& name);
-Entity* addEntity();
-Entity* addEntity(Entity e);
-void    delEntity(Entity e);
-void    clearEntities();
-void    updateSystems();
+#define COMPONENT template<typename Component>
+#define COMPONENTS template<typename... Component>
 
-// lua functions and bindings
+namespace ecs
+{
+            Entity              create();
+            void                remove(Entity e);
+COMPONENT   void                emplace(Entity e, const Component& c);
+COMPONENT   bool                has(Entity e);
+COMPONENT   Component           get(Entity e);
+COMPONENTS  std::vector<Entity> view();
+}
+
+// lua
 void luaBindings();
 void runScripts();
 }
