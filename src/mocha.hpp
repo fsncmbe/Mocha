@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <any>
 #include <unordered_map>
+#include <map>
 #include <typeindex>
 #include <functional>
 
@@ -28,76 +29,6 @@
 
 namespace mocha
 {
-
-// STRUCTS
-struct Vertex {
-  glm::vec3 position;
-  glm::vec2 tex_coord;
-  glm::vec3 normal;
-
-  bool operator==(const Vertex& other);
-};
-
-struct Color {
-  unsigned char r;
-  unsigned char g;
-  unsigned char b;
-  unsigned char a;
-};
-
-struct Rectangle {
-  float width;
-  float height;
-};
-
-struct Shader {
-  int id;
-};
-
-struct Model {
-  int indices_count;
-  unsigned int vao;
-};
-
-struct Camera {
-  float     speed;
-  float     sens;
-  float     zoom;
-  glm::vec3 up;
-  glm::mat4 view;
-  glm::mat4 projection;
-};
-
-// ECS 
-
-using Entity = unsigned int;
-
-struct System {
-  virtual void update() = 0;
-};
-
-// COMPONENTS in ecs namespace
-// differentiate better and reuse names
-namespace ecs
-{
-using Render   =  Model;
-using Camera3D =  Camera;
-struct Position {
-  glm::vec3 pos;
-  glm::vec3 rotate;
-  glm::mat4 trans;
-};
-}
-
-// COLORS 
-const Color BLACK   = {0, 0, 0, 255};
-const Color BLUE    = {0, 0, 255, 255};
-const Color RED     = {255, 0, 0, 255};
-const Color GREEN   = {0, 255, 0, 255};
-const Color YELLOW  = {255, 255, 0, 255};
-const Color PINK    = {255, 0, 255, 255};
-const Color TURQ    = {0, 255, 255, 255};
-const Color WHITE   = {255, 255, 255, 255};
 
 // ENUMS
 enum LogLevel {
@@ -159,6 +90,87 @@ kDOWN = 264,
 kUP = 265,
 };
 
+enum KeyState {
+  kPressed = 0,
+  kDown,
+  kReleased,
+  kUp,
+};
+
+// STRUCTS
+struct Vertex {
+  glm::vec3 position;
+  glm::vec2 tex_coord;
+  glm::vec3 normal;
+
+  bool operator==(const Vertex& other);
+};
+
+struct Color {
+  unsigned char r;
+  unsigned char g;
+  unsigned char b;
+  unsigned char a;
+};
+
+struct Rectangle {
+  float width;
+  float height;
+};
+
+struct Box {
+  float width;
+  float height;
+  float depth;
+};
+
+struct Shader {
+  int id;
+};
+
+struct Model {
+  int indices_count;
+  unsigned int vao;
+};
+
+struct Camera {
+  float     speed;
+  float     sens;
+  float     zoom;
+  glm::mat4 view;
+  glm::mat4 projection;
+};
+
+// ECS 
+
+using Entity = unsigned int;
+
+struct System {
+  virtual void update() = 0;
+};
+
+struct Command {
+  std::function<void(Entity&)> use;
+  Command(std::function<void(Entity&)> u) : use(u) {};
+};
+
+// COMPONENTS in ecs namespace
+// differentiate better and reuse names
+namespace ecs
+{
+using Render   =  Model;
+using Camera3D =  Camera;
+struct Position {
+  glm::vec3 pos;
+  glm::mat4 trans;
+};
+struct Physics {
+  float     speed;
+  glm::vec3 velocity;
+};
+using InputBindings = std::map<std::pair<int, KeyState>, Command*>;
+}
+
 // -------------------- FUNCTIONS
 
 // window
@@ -192,6 +204,7 @@ bool getKeyPressed(int key);
 bool getKeyDown(int key);
 bool getKeyReleased(int key);
 bool getKeyUp(int key);
+KeyState getKeyState(int key);
 
 // resources
 std::string loadFile(const std::string& path);
@@ -202,6 +215,7 @@ Model       loadModel(const std::string& name);
 #define COMPONENT template<typename Component>
 #define COMPONENTS template<typename... Component>
 
+// define them just for overview here
 namespace ecs
 {
             Entity              create();
@@ -210,12 +224,23 @@ COMPONENT   void                emplace(Entity e, const Component& c);
 COMPONENT   bool                has(Entity e);
 COMPONENT   Component           get(Entity e);
 COMPONENTS  std::vector<Entity> view();
+            void                addSystem(System* sys);
             void                update();
 }
 
 // lua
 void luaBindings();
 void runScripts();
+
+// const
+const Color BLACK   = {0, 0, 0, 255};
+const Color BLUE    = {0, 0, 255, 255};
+const Color RED     = {255, 0, 0, 255};
+const Color GREEN   = {0, 255, 0, 255};
+const Color YELLOW  = {255, 255, 0, 255};
+const Color PINK    = {255, 0, 255, 255};
+const Color TURQ    = {0, 255, 255, 255};
+const Color WHITE   = {255, 255, 255, 255};
 }
 
 // Syntax defines

@@ -63,15 +63,12 @@ void initWindow(int width, int height, const char* title)
   core.window.previous = 0;
   core.assets.path = "assets/";
   core.render.world_up = {0.0f, 1.0f, 0.0f};
+  core.window.size = {width, height};
+  core.render.yaw = -90.0f;
+  core.render.pitch = 0.0f;
 
-
-  // add cameras to core
-  Entity cam = {};
-  glm::vec3 pos =   {0, 0, 0};
-  glm::vec3 up =    {0, 1, 0};
-  glm::vec3 front = {0, 0,-1};
-  glm::vec3 right = {1, 0, 0};
-
+  // add systems
+  log(LogLevel::DEBUG, "WINDOW DONE!");
 }
 
 bool windowShouldClose()

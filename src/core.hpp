@@ -14,8 +14,7 @@ struct Core {
     std::string title;
     GLFWwindow* glfw_window;
 
-    Rectangle screen;         // whole screen
-    Rectangle render_screen;  // render area
+    glm::vec2 size;         // whole screen
     glm::vec2 render_offset;  // offset from screen to render
 
     double current;
@@ -25,10 +24,16 @@ struct Core {
   } window;
 
   struct {
+    // Shader
     Shader    current_shader;
+
+    // Cam
     glm::vec3 world_up;
+    float yaw;
+    float pitch;
     Entity*   cam_debug;
     Entity*   cam_current;
+
   } render;
 
   struct {

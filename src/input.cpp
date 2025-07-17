@@ -42,4 +42,12 @@ bool getKeyUp(int key)
   &&      checkKeyOutOfBounds(key);
 }
 
+KeyState getKeyState(int key)
+{
+  if (getKeyPressed(key)) return KeyState::kPressed;
+  if (getKeyDown(key)) return KeyState::kDown;
+  if (getKeyReleased(key)) return KeyState::kReleased;
+  return KeyState::kUp;
+}
+
 }

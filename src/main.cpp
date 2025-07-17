@@ -11,11 +11,17 @@ int main()
   mocha::Shader s = mocha::loadShader("default");
   mocha::Model m = mocha::loadModel("cube");
 
-  // reg all components
+  mocha::Entity e = mocha::ecs::create();
+  mocha::ecs::Position p;
+  p.pos = glm::vec3(1.0f);
+  p.trans = glm::mat4(1.0f);
+  mocha::ecs::emplace<mocha::ecs::Position>(e, p);
 
+  // reg all components
   mocha::shaderUse(s);
 
   MOCHA_LOOP_START
+
   MOCHA_SYSTEMS_UPDATE
 
 

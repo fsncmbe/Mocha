@@ -156,6 +156,11 @@ std::vector<Entity> view()
   return View<Component...>(getSet<Component>()...).getMatching();
 }
 
+void addSystem(System *sys)
+{
+  core.ecs.systems.push_back(sys);
+}
+
 void update()
 {
   for (System* s : core.ecs.systems)
