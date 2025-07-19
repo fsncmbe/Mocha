@@ -19,6 +19,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <ecs.hpp>
+
 #ifdef __linux__
   #define LINUX
 #endif
@@ -160,10 +162,6 @@ namespace ecs
 {
 using Render   =  Model;
 using Camera3D =  Camera;
-struct Position {
-  glm::vec3 pos;
-  glm::mat4 trans;
-};
 struct Physics {
   float     speed;
   glm::vec3 velocity;
@@ -215,18 +213,6 @@ Model       loadModel(const std::string& name);
 #define COMPONENT template<typename Component>
 #define COMPONENTS template<typename... Component>
 
-// define them just for overview here
-namespace ecs
-{
-            Entity              create();
-            void                remove(Entity e);
-COMPONENT   void                emplace(Entity e, const Component& c);
-COMPONENT   bool                has(Entity e);
-COMPONENT   Component           get(Entity e);
-COMPONENTS  std::vector<Entity> view();
-            void                addSystem(System* sys);
-            void                update();
-}
 
 // lua
 void luaBindings();
@@ -242,7 +228,6 @@ const Color PINK    = {255, 0, 255, 255};
 const Color TURQ    = {0, 255, 255, 255};
 const Color WHITE   = {255, 255, 255, 255};
 }
-
 // Syntax defines
 #define MOCHA_LOOP_START while(mocha::Begin()) {
 #define MOCHA_SYSTEMS_UPDATE mocha::ecs::update();
