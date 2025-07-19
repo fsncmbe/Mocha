@@ -19,8 +19,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <ecs.hpp>
-
 #ifdef __linux__
   #define LINUX
 #endif
@@ -155,6 +153,98 @@ struct Command {
   std::function<void(Entity&)> use;
   Command(std::function<void(Entity&)> u) : use(u) {};
 };
+// Private implementation in ecs
+namespace
+{
+struct IStorage {
+  virtual void remove(Entity) = 0;
+  virtual bool has(Entity) = 0;
+};
+
+template <typename Component>
+class ComponentSet : public IStorage
+{
+ public:
+  bool has(Entity e)
+  {
+    return connection.find(e) != connection.end();
+  }
+
+  void insert(Entity e, const Component& c)
+  {
+    if (has(e)) return;
+    connection[e] = components.size();
+    entities.push_back(e);
+    components.push_back(c);
+  }
+
+  void remove(Entity e)
+  {
+    if (!has(e)) return;
+    int index = connection[e];
+    int last = entities.size()-1;
+
+    std::swap(entities[index], entities[last]);
+    std::swap(components[index], components[last]);
+
+    connection[entities[index]] = index;
+
+    entities.pop_back();
+    components.pop_back();
+    connection.erase(e);
+  }
+
+  Component& get(Entity e)
+  {
+    return components[connection[e]];
+  }
+
+  const std::vector<Entity>& getEntities()
+  {
+    return entities;
+  }
+
+ private:
+  std::vector<Entity>             entities;
+  std::vector<Component>          components;
+  std::unordered_map<Entity, int> connection;
+};
+
+template<typename ...Component>
+class View
+{
+ public:
+  View(ComponentSet<Component>&... args) : sets(args...) {}
+
+  std::vector<Entity> getMatching()
+  {
+    std::vector<Entity> out;
+    const auto& base = getSmallest();
+
+    for (Entity e : base)
+    {
+      if ((std::get<ComponentSet<Component>&>(sets).has(e) && ...))
+      {
+        out.push_back(e);
+      }
+    }
+
+    return out;
+  }
+
+ private:
+  std::tuple<ComponentSet<Component>&...> sets;
+
+  const std::vector<Entity>& getSmallest() const
+  {
+    const std::vector<Entity>* smallest = &std::get<0>(sets).getEntities();
+    ((smallest = (std::get<ComponentSet<Component>&>(sets).getEntities().size() < smallest->size() 
+                  ? &std::get<ComponentSet<Component>&>(sets).getEntities() : smallest)), ...);
+
+    return *smallest;
+  }
+};
+}
 
 // COMPONENTS in ecs namespace
 // differentiate better and reuse names
@@ -212,6 +302,19 @@ Model       loadModel(const std::string& name);
 // ecs
 #define COMPONENT template<typename Component>
 #define COMPONENTS template<typename... Component>
+
+namespace ecs
+{
+COMPONENT ComponentSet<Component>& getSet();
+COMPONENT void emplace(Entity e, const Component& c);
+COMPONENT Component get(Entity e);
+COMPONENT bool has(Entity e);
+COMPONENTS std::vector<Entity> view();
+          Entity create();
+          void remove(Entity e);
+          void addSystem(System *sys);
+          void update();
+}
 
 
 // lua

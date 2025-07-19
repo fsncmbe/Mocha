@@ -2,6 +2,7 @@
 
 #include <mocha.hpp>
 #include <utils.hpp>
+#define MOCHA_INCLUDE_CORE
 #include <core.hpp>
 
 namespace

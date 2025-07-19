@@ -47,8 +47,13 @@ struct Core {
     bool current_mouse_button_states[MAX_MOUSE_BUTTONS];
     bool previous_mouse_button_states[MAX_MOUSE_BUTTONS];
   } input;
-};
 
+  struct {
+    std::unordered_map<std::type_index, void*> sets;
+    Entity next_entity = 0;
+    std::vector<System*> systems;
+  } ecs;
+};
 // Define global core
 extern Core core;
 }

@@ -1,20 +1,18 @@
 #define MOCHA_ECS
 
-#include <ecs.hpp>
+#include <core.hpp>
 
 namespace mocha::ecs
 {
 
-Core_ecs core_ecs;
-
 Entity create()
 {
-  return core_ecs.next_entity++;
+  return core.ecs.next_entity++;
 }
 
 void remove(Entity e)
 {
-  for (auto& [t, s] : core_ecs.sets)
+  for (auto& [t, s] : core.ecs.sets)
   {
     ComponentSet<std::any>* c_set = static_cast<ComponentSet<std::any>*>(s);
     if (c_set->has(e))
@@ -26,14 +24,15 @@ void remove(Entity e)
 
 void addSystem(System *sys)
 {
-  core_ecs.systems.push_back(sys);
+  core.ecs.systems.push_back(sys);
 }
 
 void update()
 {
-  for (System* s : core_ecs.systems)
+  for (System* s : core.ecs.systems)
   {
     s->update();
   }
 }
+
 }
